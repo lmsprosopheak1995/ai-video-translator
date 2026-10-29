@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI DubMaster Pro - Video Translator & Dubbing</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app-container">
+    <aside class="sidebar">
+        <div class="logo"><i class="fa-solid fa-wand-magic-sparkles"></i><span>DubMaster Pro</span></div>
+        <nav class="nav-menu">
+            <a href="#" class="active" id="btn-studio"><i class="fa-solid fa-video"></i> Studio</a>
+            <a href="#" id="btn-settings"><i class="fa-solid fa-gear"></i> Settings &amp; API</a>
+            <a href="#" id="btn-history"><i class="fa-solid fa-clock-rotate-left"></i> History</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-bar">
+            <h1>AI Video Translator &amp; Dubbing Studio</h1>
+            <div class="user-profile"><span class="badge">Pro Plan</span><i class="fa-solid fa-circle-user"></i></div>
+        </header>
+
+        <div class="workspace">
+            <section class="upload-section" id="upload-box">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <h3>អូសដាក់វីដេអូទីនេះ ឬចុចដើម្បីជ្រើសរើស</h3>
+                <p>គាំទ្រឯកសារ MP4, MOV, WebM</p>
+                <input type="file" id="video-file-input" accept="video/*" hidden>
+                <button class="btn-primary" id="btn-choose" type="button">ជ្រើសរើសឯកសារវីដេអូ</button>
+            </section>
+
+            <section class="studio-section hidden" id="studio-box">
+                <div class="preview-container">
+                    <div class="video-wrap">
+                        <video id="video-preview" controls></video>
+                        <div id="subtitle-overlay" class="subtitle-overlay"></div>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <h3>ការកំណត់ការបកប្រែ</h3>
+                    <div class="form-group">
+                        <label>ភាសាដើម (Source):</label>
+                        <select id="source-lang">
+                            <option value="auto">ស្វ័យប្រវត្តិ (Auto Detect)</option>
+                            <option value="English" selected>English</option>
+                            <option value="Khmer">Khmer (ខ្មែរ)</option>
+                            <option value="Thai">Thai (ថៃ)</option>
+                            <option value="Chinese">Chinese (ចិន)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>ភាសាគោលដៅ (Target):</label>
+                        <select id="target-lang">
+                            <option value="Khmer" selected>Khmer (ខ្មែរ)</option>
+                            <option value="English">English</option>
+                            <option value="Thai">Thai (ថៃ)</option>
+                            <option value="Chinese">Chinese (ចិន)</option>
+                        </select>
+                    </div>
+                    <button class="btn-success" id="btn-start-process" type="button">
+                        <i class="fa-solid fa-play"></i> ចាប់ផ្តើមបកប្រែ
+                    </button>
+                    <div id="status" class="status hidden"></div>
+                    <button class="btn-secondary" id="btn-change-video" type="button">
+                        <i class="fa-solid fa-rotate-left"></i> ប្ដូរវីដេអូផ្សេង
+                    </button>
+                </div>
+
+                <!-- តារាងចំណងជើងរង -->
+                <div class="subs-panel hidden" id="subs-panel">
+                    <div class="subs-head">
+                        <h3>ចំណងជើងរង (Subtitles)</h3>
+                        <div class="subs-actions">
+                            <select id="dub-voice" class="mini-select">
+                                <option value="km-female" selected>ខ្មែរ - ស្រី (Sreymom)</option>
+                                <option value="km-male">ខ្មែរ - ប្រុស (Piseth)</option>
+                                <option value="en-female">English - Female</option>
+                                <option value="en-male">English - Male</option>
+                                <option value="th-female">Thai - Female</option>
+                                <option value="zh-female">Chinese - Female</option>
+                            </select>
+                            <label class="chk"><input type="checkbox" id="dub-keep" checked> រក្សាសំឡេងដើម (តូច)</label>
+                            <button class="btn-success inline-green" id="btn-dub" type="button"><i class="fa-solid fa-microphone-lines"></i> បង្កើតវីដេអូដាក់សំឡេង</button>
+                            <button class="btn-secondary inline" id="btn-speak-all" type="button"><i class="fa-solid fa-volume-high"></i> ស្តាប់សំឡេង</button>
+                            <button class="btn-secondary inline" id="btn-export-srt" type="button"><i class="fa-solid fa-download"></i> Export SRT</button>
+                        </div>
+                    </div>
+                    <table class="subs-table">
+                        <thead><tr><th>#</th><th>Start</th><th>End</th><th>ខ្លឹមសារ</th></tr></thead>
+                        <tbody id="subs-body"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+</div>
+
+<!-- Modal: Settings -->
+<div class="modal hidden" id="modal-settings">
+    <div class="modal-box">
+        <div class="modal-head"><h3>Settings &amp; API</h3><button class="close-x" data-close>&times;</button></div>
+        <div class="form-group">
+            <label>Gemini API Key:</label>
+            <input type="password" id="set-apikey" placeholder="AIza...">
+            <small>យកពី aistudio.google.com/apikey — រក្សាទុកក្នុងកុំព្យូទ័ររបស់អ្នកតែប៉ុណ្ណោះ</small>
+        </div>
+        <div class="form-group">
+            <label>Model:</label>
+            <input type="text" id="set-model" placeholder="gemini-2.5-flash">
+        </div>
+        <div class="form-group">
+            <label>Backend URL:</label>
+            <input type="text" id="set-backend" placeholder="http://127.0.0.1:8001">
+        </div>
+        <div class="form-group">
+            <label>ភាសាសំឡេង TTS (Browser):</label>
+            <input type="text" id="set-voicelang" placeholder="km-KH">
+        </div>
+        <button class="btn-success" id="btn-save-settings" type="button">រក្សាទុក</button>
+        <button class="btn-secondary" id="btn-clear-key" type="button">លុប API Key</button>
+    </div>
+</div>
+
+<!-- Modal: History -->
+<div class="modal hidden" id="modal-history">
+    <div class="modal-box wide">
+        <div class="modal-head"><h3>History</h3><button class="close-x" data-close>&times;</button></div>
+        <div id="history-list"></div>
+        <button class="btn-secondary" id="btn-clear-history" type="button">លុបប្រវត្តិទាំងអស់</button>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
